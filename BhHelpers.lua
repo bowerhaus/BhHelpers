@@ -80,7 +80,7 @@ end
 
 function Sprite:bhSendToBack()
 	-- Send a sprite to the back of its parent's z-order
-	self:getParent():addChildAt(self, 0)
+	self:getParent():addChildAt(self, 1)
 end
 
 function Sprite:bhSetIndex(index)
@@ -89,7 +89,7 @@ function Sprite:bhSetIndex(index)
 	if index<parent:getChildIndex(self) then
 		index=index-1
 	end
-	parent:addChildAt(self, index)
+	parent:addChildAt(self, index+1)
 end
 
 --[[ These anchor point functions are buggy
