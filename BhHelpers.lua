@@ -237,6 +237,43 @@ function table.reverse(t)
     return newTable
 end
 
+function table.filter(t, predicate)
+	-- Filter a table in place based on a predicate function
+	local j = 1	 
+	for i = 1,#t do
+		local v = t[i]
+		if predicate(v) then
+			t[j] = v
+			j = j + 1
+		end
+	end	 
+	while t[j] ~= nil do
+		t[j] = nil
+		j = j + 1
+	end	 
+	return t
+end
+
+function pairsKeySorted(t, f)
+    local a = {}    
+    for n in pairs(t) do
+        table.insert(a, n)
+    end    
+    table.sort(a, f)
+ 
+    local i = 0      -- iterator variable
+    local iter = function ()   -- iterator function
+        i = i + 1
+        if a[i] == nil then
+            return nil
+        else
+            return a[i], t[a[i]]
+        end
+    end
+ 
+    return iter
+end
+
 function math.round(num) 
 	-- Round a number to the nearest integer
 	return math.floor(num+.5)
