@@ -59,6 +59,65 @@ function Sprite:ignoreTouches(event)
 	self:addEventListener(Event.TOUCHES_BEGIN, self.ignoreTouchHandler, self)
 end
 
+function Sprite:eachChild()
+	local i=0
+	local max=self:getNumChildren()
+	return function() 
+		i=i + 1; 
+		if i<= max then 
+			return self:getChildAt(i) 
+		end
+	end
+end
+
+function Sprite:getChildren()
+	local children={}
+	for each in self:eachChild() do
+		children[#children+1]=each
+	end
+	return children
+end
+
+function Sprite:scaleToWidth(width)
+	local scaleBy=width/self:getWidth()
+	self:setScaleX(self:getScaleX()*scaleBy)
+	self:setScaleY(self:getScaleY()*scaleBy)
+end
+
+function Sprite:scaleToHeight(height)
+	local scaleBy=height/self:getHeight()
+	self:setScaleX(self:getScaleX()*scaleBy)
+	self:setScaleY(self:getScaleY()*scaleBy)
+end
+
+function Sprite:multiplyScale(scaleBy)
+	self:setScaleX(self:getScaleX()*scaleBy)
+	self:setScaleY(self:getScaleY()*scaleBy)
+end
+
+function Sprite:eachSibling()
+	local i=0
+	local parent=self:getParent()
+	local max=parent:getNumChildren()
+	return function() 
+		i=i + 1; 
+		if i<=max and parent:getChildAt(i)==self then
+			i=i + 1
+		end
+		if i<=max then
+			return parent:getChildAt(i) 
+		end
+	end
+end
+
+function Sprite:getSiblings()
+	local siblings={}
+	for each in self:eachSibling() do
+		siblings[#siblings+1]=each
+	end
+	return siblings
+end
+
 function Sprite:bhSetWidth(newWidth)
 	-- Set a sprite's width using the scale property
 	local x,y,width,height=self:getBounds(self)
@@ -180,12 +239,12 @@ end
 function TexturePack.bhLoad(name)
 	-- Load a texture pack using a single name to identify files that
 	-- may be found along the Lua search path.
-	return TexturePack.new(pathto(name..".txt"), pathto(name..".png"))
+	return TexturePack.new(pathto(name..".txt"), pathto(name..".png"), true)
 end
 
 function Bitmap.bhLoad(name)
 	-- Load a Bitmap from a PNG file that may be found along the Lua search path.
-	return Bitmap.new(Texture.new(pathto(name..".png")))
+	return Bitmap.new(Texture.new(pathto(name..".png"), true))
 end
 
 function Stage:bhGetCenter()
@@ -237,6 +296,15 @@ function table.reverse(t)
     return newTable
 end
 
+function table.contains(t, element)
+	for _, value in pairs(t) do
+		if value == element then
+		  return true
+		end
+	end
+	return false
+end
+
 function table.filter(t, predicate)
 	-- Filter a table in place based on a predicate function
 	local j = 1	 
@@ -274,9 +342,14 @@ function pairsKeySorted(t, f)
     return iter
 end
 
-function math.round(num) 
-	-- Round a number to the nearest integer
-	return math.floor(num+.5)
+function math.round(num, factor) 
+	if factor then
+		-- Round a number to the nearest factor
+		return factor*math.round(num/factor)
+	else
+		-- Round a number to the nearest integer
+		return math.floor(num+.5)
+	end
 end
 
 function math.roundTo(num, factor) 
@@ -334,6 +407,13 @@ function bhDebug(text, ...)
 	-- Debugging trace messages that can be turned on and off
 	if BhDebugOn then
 		print(text, ...)
+	end
+end
+
+function bhDebugf(text, ...)
+	-- Debugging trace messages that can be turned on and off
+	if BhDebugOn then
+		print(string.format(text, ...))
 	end
 end
 
