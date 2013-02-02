@@ -296,6 +296,16 @@ function table.reverse(t)
     return newTable
 end
 
+function table.shuffle(t)
+	local n = #t
+	while n >= 2 do
+		local k = math.random(n) 
+		print(k)
+		t[n], t[k] = t[k], t[n]
+		n = n - 1
+	end
+end
+
 function table.contains(t, element)
 	for _, value in pairs(t) do
 		if value == element then
@@ -372,6 +382,10 @@ function math.pt2dAngle(x0, y0, x1, y1)
 		angle=360+angle
 	end
 	return angle
+end
+
+function string.findmatch(text, pattern, start)
+	return string.sub(text, string.find(text, pattern, start))
 end
 
 function io.exists(filename)
