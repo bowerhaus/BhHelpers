@@ -250,12 +250,12 @@ function SoundChannel:get(param, value)
 	return SoundChannel.___get(self, param, value)
 end
 
-function SoundChannel:fadeIn(duration, finalLevel, completionFunc)
+function SoundChannel:fadeIn(duration, optFinalLevel, completionFunc)
 	self:setVolume(0)
-	GTween.new(self, duration, { volume=finalLevel or 0 }, { onComplete=completionFunc })
+	GTween.new(self, duration, { volume=optFinalLevel or 1 }, { onComplete=completionFunc })
 end
 
-function SoundChannel:fadeOut(duration, finalLevel, completionFunc)
+function SoundChannel:fadeOut(duration, optFinalLevel, completionFunc)
 	GTween.new(self, duration, { volume=finalLevel or 0 }, { onComplete=
 		function() 
 			self:stop()
