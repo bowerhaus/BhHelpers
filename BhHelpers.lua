@@ -151,60 +151,6 @@ function Sprite:bhSetIndex(index)
 	parent:addChildAt(self, index+1)
 end
 
---[[ These anchor point functions are buggy
-function Sprite:bhSetAnchorPoint(x, y)
-	if self.setAnchorPoint then
-		self:setAnchorPoint(x, y)
-	else	
-		self._apx=x
-		self._apy=y
-	end
-end
-
-function Sprite:bhGetAnchorPoint(x, y)
-	if self.getAnchorPoint then
-		return self:getAnchorPoint()
-	else	
-		if self._apx==nil then
-			self._apx=0.5
-			self._apy=0.5
-		end
-		return self._apx, self._apy
-	end
-end
-
-function Sprite:bhSetPosition(x, y)
-	if self.getAnchorPoint then
-		self:setPosition(x, y)
-		return 
-	end
-	local apx, apy=self:bhGetAnchorPoint()
-	local w, h=self:getWidth(), self:getHeight()
-	local offsetX, offsetY=apx*w, apy*h
-	self:setPosition(x-offsetX, y-offsetY)
-end
-
-function Sprite:bhGetPosition()
-	if self.getAnchorPoint then
-		return self:getPosition()
-	end
-	local apx, apy=self:bhGetAnchorPoint()
-	local w, h=self:getWidth(), self:getHeight()
-	local offsetX, offsetY=apx*w-w/2, apy*h-h/2
-	return self:getX()+offsetX, self:getY()+offsetY
-end
-
-function Sprite:getBhX()
-	local x, y=self:bhGetPosition()
-	return x
-end
-
-function Sprite:getBhY()
-	local x, y=self:bhGetPosition()
-	return y
-end
---]]
-
 function Sprite:bhGetAnchorPoint(x, y)
 	if self.getAnchorPoint then
 		return self:getAnchorPoint()
@@ -277,6 +223,45 @@ function Shape.bhMakeRect(x, y, width, height, optStrokeColor, optFillColor, opt
 	rect:lineTo(x, y)
 	rect:endPath()
 	return rect
+end
+
+SoundChannel.___set=SoundChannel.set
+
+function SoundChannel:set(param, value)
+	if param=="volume" then
+		self:setVolume(value)
+	elseif param=="pitch" then
+		self:setPitch(value)
+	else
+		SoundChannel.___set(self, param, value)
+	end
+	return self
+end
+ 
+SoundChannel.___get=SoundChannel.get
+
+function SoundChannel:get(param, value)
+	if param=="volume" then
+		return self:getVolume()
+	end
+	if param=="pitch" then
+		return self:getPitch()
+	end
+	return SoundChannel.___get(self, param, value)
+end
+
+function SoundChannel:fadeIn(duration, finalLevel, completionFunc)
+	self:setVolume(0)
+	GTween.new(self, duration, { volume=finalLevel or 0 }, { onComplete=completionFunc })
+end
+
+function SoundChannel:fadeOut(duration, finalLevel, completionFunc)
+	GTween.new(self, duration, { volume=finalLevel or 0 }, { onComplete=
+		function() 
+			self:stop()
+			if completionFunc then completionFunc() end
+		end
+		})
 end
 
 function table.copy(t)

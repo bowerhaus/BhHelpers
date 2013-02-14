@@ -39,18 +39,23 @@ function WriteStream:put(s)
 	end
 end
 
-function WriteStream:cr(n)
+function WriteStream:char(char, n)
 	if n then 
-		for i=1,n-1 do self:put("\n") end
+		for i=1,n-1 do self:put(char) end
 	end
-	self:put("\n")
+	self:put(char)
+end
+
+function WriteStream:cr(n)
+	self:char("\n", n)
 end
 
 function WriteStream:tab(n)
-	if n then 
-		for i=1,n-1 do self:put("\t") end
-	end
-	self:put("\t")
+	self:char("\t", n)
+end
+
+function WriteStream:space(n)
+	self:char(" ", n)
 end
 
 function WriteStream:contents()
