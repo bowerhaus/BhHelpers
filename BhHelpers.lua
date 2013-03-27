@@ -79,6 +79,10 @@ function Sprite:isChildOf(anotherSprite)
 	return false
 end	
 
+function Sprite:localToLocal(x, y, target)
+	return target:globalToLocal(self:localToGlobal(x, y))
+end
+
 function Sprite:resetAnchor(ax, ay)
 	ax=ax or 0
 	ay=ay or 0	
@@ -102,14 +106,22 @@ function Sprite:resetOrigin(rx, ry)
 	self:setPosition(x+ox+rx, y+oy+ry)
 end
 
-function Sprite:rotateAboutAnchor(rotation, ax, ay)
+function Sprite:rotateAboutAnchor(angle, ax, ay)
 	local x, y, w, h=self:getBounds(self)
 	local px=ax*w
 	local py=ay*h
 	local gx, gy=self:localToGlobal(px, py)
 	local matrix=self:getMatrix()
 	matrix=matrix:translate(-gx, -gy)
-	matrix=matrix:rotate(rotation)
+	matrix=matrix:rotate(-angle)
+	matrix=matrix:translate(gx, gy)
+	self:setMatrix(matrix)
+end
+
+function Sprite:rotateAbout(angle, gx, gy)
+	local matrix=self:getMatrix()
+	matrix=matrix:translate(-gx, -gy)
+	matrix=matrix:rotate(-angle)
 	matrix=matrix:translate(gx, gy)
 	self:setMatrix(matrix)
 end
@@ -392,6 +404,22 @@ function Sprite:disableUpdates()
 	self:removeEventListener(Event.ENTER_FRAME, self.onUpdate, self)
 end
 
+function Matrix:getData()
+	return {
+		m11=self:getM11(),
+		m12=self:getM12(),
+		m21=self:getM21(),
+		m22=self:getM22(),
+		tx=self:getTx(),
+		ty=self:getTy()
+	}
+end
+
+function Matrix:setData(data)
+	self:setElements(data.m11, data.m12, data.m21, data.m22, data.tx, data.ty)
+	return self
+end	
+
 function FontBase:getDescender()
 	return self:getLineHeight()-self:getAscender()
 end
@@ -662,6 +690,29 @@ function table.copy(t)
 	local u = {}
 	for k, v in pairs(t) do u[k] = v end
 	return setmetatable(u, getmetatable(t))
+end
+
+function table.deepcopy(orig)
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        copy = {}
+        for orig_key, orig_value in next, orig, nil do
+            copy[deepcopy(orig_key)] = deepcopy(orig_value)
+        end
+        setmetatable(copy, deepcopy(getmetatable(orig)))
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+    return copy
+end
+
+function table.copyFromTo(t, start, stop)
+	local u = {}
+	for i=start, stop do
+		u[#u+1] = t[i] 
+	end
+	return u
 end
 
 function table.getValues(t)
